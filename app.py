@@ -12,7 +12,7 @@ from dash.dependencies import Input, Output
 from urllib.request import urlopen
 import json
 
-EN_df = pd.read_excel('/Users/greglewis/Desktop/election20/florida_dash.xlsx')
+EN_df = pd.read_excel('florida_dash.xlsx')
 EN_df['County'] = EN_df.CountyName
 
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
