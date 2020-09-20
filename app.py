@@ -60,6 +60,26 @@ fig.update_layout(
     )
 )
 
+fig2 = px.scatter(EN_df, x="NET_DEM_20_pct", y="NET_DEM_16_pct",
+                 size="Total_Vote_20", color="COUNTY_CAT",
+                 color_discrete_map={ # replaces default color mapping by value
+                    "SOLID BLUE":"Blue", "SOLID RED":"Red",
+                    "SWING":"Gray"},
+                 hover_name="County", size_max=60,
+                 labels={'COUNTY_CAT':'Category',
+                    'NET_DEM_20_pct':'Biden Margin',
+                    'NET_DEM_16_pct':'Clinton Margin',
+                    'Expected_20_Vote_Remaining':'Expected Votes Remaining',
+                    'Proj_Winner':'Projected Winner'
+                 },
+                hover_data={
+                   'COUNTY_CAT':True,
+                   'NET_DEM_20_pct':':+.3p',
+                   'NET_DEM_16_pct':':+.3p',
+                   'Total_Vote_20':':,.0f',
+                   'Expected_20_Vote_Remaining':':,.0f',
+                   'Proj_Winner':True
+                 })    
 
 app.layout = html.Div(children=[
     html.H1(children='2020 Election Night Dashboard'),
@@ -69,9 +89,12 @@ app.layout = html.Div(children=[
     '''),
 
     dcc.Graph(
-        id='example-graph',
+        id='florida-map',
         figure=fig
-    )
+    ),
+    dcc.Graph(
+        id='florida-bubbles',
+        figure=fig2
 ])
 
 if __name__ == '__main__':
