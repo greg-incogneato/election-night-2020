@@ -89,12 +89,13 @@ app.layout = html.Div(children=[
     '''),
 
     dcc.Graph(
-        id='florida-map',
+        id='example-graph',
         figure=fig
     ),
     dcc.Graph(
-        id='florida-bubbles',
+        id='example-graph2',
         figure=fig2
+    ),    
 ])
 
 if __name__ == '__main__':
