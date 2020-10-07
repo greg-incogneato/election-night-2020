@@ -149,9 +149,16 @@ stacked_fig_PA = stacked_bars(EN_PA_df)
 bubbles_fig_FL = bubbles(EN_FL_df)
 bubbles_fig_PA = bubbles(EN_PA_df)
 
+app.title = 'Election 2020 Dashboard'
 app.layout = html.Div(children=[
     html.H1(children='2020 Election Night Dashboard'),
-
+        html.Div([dcc.Markdown(
+            """
+            Welcome to my geocities page. I will update this text later with some detail of what you are seeing.
+            """
+        ),
+            html.P([html.Small("You might find some more context on my twitter "), html.A(html.Small("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter"), html.Small(".")]),
+    ]),
     html.Div(children='''
         Florida.
     '''),
@@ -182,6 +189,12 @@ app.layout = html.Div(children=[
         id='penn-stacked',
         figure=stacked_fig_PA
     ),
+    html.Div([dcc.Markdown(
+        """
+        Closing text and detail here.
+        """  
+    )]),
+
 ])
 
 if __name__ == '__main__':

@@ -51,7 +51,7 @@ def rename_columns(cols, suffix):
 orig_col_list = ['DEM', 'OTHER', 'REP', 'NET_DEM', 'WINNER']
 
 # get florida data
-fl_hist = '/Users/greglewis/Desktop/election20/git/election-night-2020/florida_hist.csv'
+fl_hist = 'florida_hist.csv'
 fl_hist_df = pd.read_csv(fl_hist,  index_col=0)
 
 #update URL on election night
@@ -61,13 +61,13 @@ election_night_data_FL = read_csv_regex(url_FL, ['ElectionDate'])
 # writes to file for archive
 # create timestamp and file name
 timestamp_for_file = datetime.now().strftime("%d-%b-%Y_%H-%M-%S")
-archive_file_name = "/Users/greglewis/Desktop/election20/git/election-night-2020/live_results/FL_election_night_raw_data_extract_%s.xlsx" % timestamp_for_file
+archive_file_name = "live_results/FL_election_night_raw_data_extract_%s.xlsx" % timestamp_for_file
 
 # write to excel
 election_night_data_FL.to_excel(archive_file_name) 
 
 # get PA data
-penn_hist = '/Users/greglewis/Desktop/election20/git/election-night-2020/penn_hist.csv'
+penn_hist = 'penn_hist.csv'
 penn_hist_df = pd.read_csv(penn_hist,  index_col=0)
 
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
@@ -81,7 +81,7 @@ with open('PA_extract.xml', 'wb') as f:
 
 # create timestamp and file name
 timestamp_for_file = datetime.now().strftime("%d-%b-%Y_%H-%M-%S")
-archive_file_name = "/Users/greglewis/Desktop/election20/git/election-night-2020/live_results/PA_election_night_raw_data_extract_%s.xml" % timestamp_for_file
+archive_file_name = "live_results/PA_election_night_raw_data_extract_%s.xml" % timestamp_for_file
 
 # create archive version of xml file
 with open(archive_file_name, 'wb') as f: 
