@@ -179,5 +179,5 @@ def process_live_file(live_df, hist_df, state):
 # process election night data into full table
 full_table_EN_PA = process_live_file(EN_extract_df, penn_hist_df, 'PA')
 full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
-full_table_EN_FL.to_csv("florida_dash.csv") 
-full_table_EN_PA.to_csv("penn_dash.csv") 
+full_table_EN_FL.to_csv("florida_dash.csv", index_label='CountyName') 
+full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
