@@ -130,35 +130,33 @@ EN_extract_df["RaceCode"].replace({"President of the United States": "PRE"}, inp
 
 def process_live_file(live_df, hist_df, state):
 	# process dataframe
-	live_df['PartyCode'] = live_df.apply(condense_third_parties, axis=1)
+	live_df['PartyCode3'] = live_df.apply(condense_third_parties, axis=1)
 	
 	potus_20_raw = pd.pivot_table(live_df[(live_df.RaceCode == 'PRE')], \
-	                            index=['CountyName'], columns='PartyCode', values='CanVotes', \
+	                            index=['CountyName'], columns='PartyCode3', values='CanVotes', \
 	                            aggfunc=np.sum)
 
-
 	potus_20_pct = pd.pivot_table(live_df[(live_df.RaceCode == 'PRE')], \
-	                            index=['CountyName'], columns='PartyCode', values='CanVotes', \
+	                            index=['CountyName'], columns='PartyCode3', values='CanVotes', \
 	                            aggfunc=np.sum).apply(lambda x: x/x.sum(), axis=1).round(4)
+
+	if state == "PA":
+		potus_20_raw['OTHER'] = 0
+		potus_20_raw = potus_20_raw[['DEM', 'OTHER', 'REP']]
 
 	potus_20_raw['NET_DEM'] = potus_20_raw["DEM"] - potus_20_raw["REP"]
 	potus_20_raw['WINNER'] = potus_20_raw.apply(county_winner, axis=1)
-	
-	if state == "PA":
-		potus_20_raw['OTHER'] = 0
-
 	potus_20_raw.columns = rename_columns(orig_col_list, '_20_raw')
+
+	if state == "PA":
+		potus_20_pct['OTHER'] = 0
+		potus_20_pct = potus_20_pct[['DEM', 'OTHER', 'REP']]
 
 	potus_20_pct['NET_DEM'] = potus_20_pct["DEM"] - potus_20_pct["REP"]
 	potus_20_pct['WINNER'] = potus_20_pct.apply(county_winner, axis=1)
-	
-	if state == "PA":
-		potus_20_pct['OTHER'] = 0
-
 	potus_20_pct.columns = rename_columns(orig_col_list, '_20_pct')
 
 	full_table_EN = pd.concat([hist_df,potus_20_raw,potus_20_pct], axis=1)
-
 	full_table_EN['Total_Vote_20'] = full_table_EN['DEM_20_raw'] + full_table_EN['REP_20_raw'] + full_table_EN['OTHER_20_raw']
 	full_table_EN['Turnout_20'] = (full_table_EN['Total_Vote_20'] / full_table_EN['Reg_20_Total']).round(3)
 	full_table_EN['Expected_20_Vote_Remaining'] = full_table_EN['Expected_2020_Vote'] - full_table_EN['Total_Vote_20']
@@ -177,7 +175,8 @@ def process_live_file(live_df, hist_df, state):
 	return full_table_EN
 
 # process election night data into full table
-full_table_EN_PA = process_live_file(EN_extract_df, penn_hist_df, 'PA')
 full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
+full_table_EN_PA = process_live_file(EN_extract_df, penn_hist_df, 'PA')
+
 full_table_EN_FL.to_csv("florida_dash.csv", index_label='CountyName') 
 full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
