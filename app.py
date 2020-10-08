@@ -194,8 +194,8 @@ penn_hist = 'penn_hist.csv'
 penn_hist_df = pd.read_csv(penn_hist,  index_col=0)
 
 # update FL url on election night
-url_FL = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
-
+# url_FL = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
+url_FL = 'https://srv-file14.gofile.io/downloadStore/srv-store4/MqLTMJ/20161108_ElecResultsFL.txt'
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
 url_PA = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=23&FeedName=2020+Primary+Election+by+County'
 
@@ -222,21 +222,21 @@ def get_new_data_FL():
 def refresh_live_data():
     # un-comment these rows to resume live updates from the web!!
     election_night_data_FL = update_FL(url_FL)
-    election_night_data_PA = update_PA(url_PA)
+    # election_night_data_PA = update_PA(url_PA)
 
     # process election night data into full table
     full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
-    full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
+    # full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
 
     full_table_EN_FL.to_csv("florida_dash.csv", index_label='CountyName') 
-    full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
+    # full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
     # end un-comment
   
 
 def get_new_data_every(period=UPDATE_INTERVAL):
     """Update the data every 'period' seconds"""
     while True:
-        # refresh_live_data()
+        refresh_live_data()
         get_new_data_PA()
         get_new_data_FL()
         timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
