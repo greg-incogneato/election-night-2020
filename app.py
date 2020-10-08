@@ -195,7 +195,7 @@ penn_hist_df = pd.read_csv(penn_hist,  index_col=0)
 
 # update FL url on election night
 # url_FL = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
-url_FL = 'https://srv-file14.gofile.io/downloadStore/srv-store4/MqLTMJ/20161108_ElecResultsFL.txt'
+url_FL = 'https://greg-incogneato.imfast.io/20161108_ElecResultsFL.txt'
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
 url_PA = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=23&FeedName=2020+Primary+Election+by+County'
 
