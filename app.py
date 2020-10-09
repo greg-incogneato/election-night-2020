@@ -276,7 +276,7 @@ def make_layout():
         ),
         dcc.Interval(
             id='interval-component',
-            interval=1*1000*10,#*60*5, # 5 minutes in milliseconds
+            interval=1*1000*60,#*60*5, # 5 minutes in milliseconds
             n_intervals=0
         ),
         html.Div([dcc.Markdown(
