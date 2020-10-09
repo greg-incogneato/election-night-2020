@@ -59,13 +59,8 @@ get_new_data_FL()
 executor = ThreadPoolExecutor(max_workers=1)
 executor.submit(get_new_data_every)
 ###############################################
->>>>>>> Stashed changes
 
-EN_FL_df = pd.read_csv('florida_dash.csv')
-EN_FL_df['County'] = EN_FL_df.CountyName
 
-EN_PA_df = pd.read_csv('penn_dash.csv')
-EN_PA_df['County'] = EN_PA_df.CountyName
 
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
@@ -186,23 +181,13 @@ def choropleth(df, lat, lon, zoom):
     
     return fig
 
+
+#####
+## Call each graph with a app.callback function
+
 PA_map_detail = [41.203323,-77.194527,6]
 FL_map_detail = [27.664827,-81.515755,5]
 
-<<<<<<< Updated upstream
-map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
-map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
-
-stacked_fig_FL = stacked_bars(EN_FL_df)
-stacked_fig_PA = stacked_bars(EN_PA_df)
-
-bubbles_fig_FL = bubbles(EN_FL_df)
-bubbles_fig_PA = bubbles(EN_PA_df)
-
-app.title = 'Election 2020 Dashboard'
-app.layout = html.Div(children=[
-    html.H1(children='2020 Election Night Dashboard'),
-=======
 
 @app.callback(Output('florida-map', 'figure'),
               [Input('interval-component', 'n_intervals')])
@@ -294,51 +279,34 @@ def make_layout():
             interval=1*1000*10,#*60*5, # 5 minutes in milliseconds
             n_intervals=0
         ),
->>>>>>> Stashed changes
         html.Div([dcc.Markdown(
             """
-            Welcome to my geocities page. I will update this text later with some detail of what you are seeing.
-            """
-        ),
-            html.P([html.Small("You might find some more context on my twitter "), html.A(html.Small("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter"), html.Small(".")]),
-    ]),
-    html.Div(children='''
-        Florida.
-    '''),
-    dcc.Graph(
-        id='florida-map',
-        figure=map_FL
-    ),
-    dcc.Graph(
-        id='florida-bubbles',
-        figure=bubbles_fig_FL
-    ),
-    dcc.Graph(
-        id='florida-stacked',
-        figure=stacked_fig_FL
-    ),
-    html.Div(children='''
-        Pennsylvania.
-    '''),    
-    dcc.Graph(
-        id='penn-map',
-        figure=map_PA
-    ),
-    dcc.Graph(
-        id='penn-bubbles',
-        figure=bubbles_fig_PA
-    ),
-    dcc.Graph(
-        id='penn-stacked',
-        figure=stacked_fig_PA
-    ),
-    html.Div([dcc.Markdown(
-        """
-        Closing text and detail here.
-        """  
-    )]),
+            Closing text and detail here.
+            """  
+        )]),
 
-])
+    ])
+
+app.title = 'Election 2020 Dashboard'
+app.layout = make_layout
+# @app.callback(Output('live-update-text', 'children'),
+#               [Input('interval-component', 'n_intervals')])
+# def update_time_and_data(n):
+    # timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
+
+    # un-comment these rows to resume live updates from the web!!
+    #election_night_data_FL = update_FL(url_FL)
+    #election_night_data_PA = update_PA(url_PA)
+
+    # process election night data into full table
+    #full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
+    #full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
+
+    #full_table_EN_FL.to_csv("florida_dash.csv", index_label='CountyName') 
+    #full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
+    ## end un-comment
+
+    # return "Updates every 5 minutes. Last updated: %s" % timestamp
 
 if __name__ == '__main__':
     app.run_server(debug=True)
