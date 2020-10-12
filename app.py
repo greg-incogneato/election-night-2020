@@ -11,6 +11,7 @@ from urllib.request import urlopen
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from io import StringIO
 import io
 import json
@@ -27,7 +28,7 @@ s3 = boto3.resource('s3')
 # re-scan the dashboard data files to pick up updates
 # set to load every 60 seconds; data will refresh every 1 minutes
 # number of seconds between re-calculating the data                                                                                                                           
-UPDATE_INTERVAL = 60
+UPDATE_INTERVAL = 60*5
 
 def get_new_data_PA():
     """Updates the global variable 'data' with new data"""
@@ -61,7 +62,6 @@ executor.submit(get_new_data_every)
 ###############################################
 
 
-
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
 
@@ -69,6 +69,106 @@ external_stylesheets = ['https://cdn.jsdelivr.net/gh/kognise/water.css@latest/di
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
+
+
+def tall_EN_df(df):
+    biden_vote_df = pd.DataFrame(df[['DEM_20_raw','COUNTY_CAT','County']])
+    biden_vote_df.columns = ['Votes','Category','County']
+    biden_vote_df['Candidate'] = "Biden"
+
+    trump_vote_df = pd.DataFrame(df[['REP_20_raw','COUNTY_CAT','County']])
+    trump_vote_df.columns = ['Votes','Category','County']
+    trump_vote_df['Candidate'] = "Trump"
+
+    other_vote_df = pd.DataFrame(df[['OTHER_20_raw','COUNTY_CAT','County']])
+    other_vote_df.columns = ['Votes','Category','County']
+    other_vote_df['Candidate'] = "Other"
+
+    remaining_vote_df = pd.DataFrame(df[['Expected_20_Vote_Remaining','COUNTY_CAT','County']])
+    remaining_vote_df.columns = ['Votes','Category','County']
+    remaining_vote_df['Candidate'] = "Remaining"
+    
+    table_df = pd.concat([biden_vote_df,trump_vote_df,other_vote_df], axis=0)
+    return table_df
+
+def tall_EN_df_reg(df):
+    reg_df = pd.DataFrame(df[['Reg_20_Total','COUNTY_CAT','County']])
+    reg_df.columns = ['Votes','Category','County']
+    reg_df['Category'] = 'Registered Voters'
+    
+    expected_df = pd.DataFrame(df[['Expected_2020_Vote','COUNTY_CAT','County']])
+    expected_df.columns = ['Votes','Category','County']
+    expected_df['Category'] = 'Expected Votes'
+
+    remaining_df = pd.DataFrame(df[['Expected_20_Vote_Remaining','COUNTY_CAT','County']])
+    remaining_df.columns = ['Votes','Category','County']
+    remaining_df['Category'] = 'Remaining Votes'
+
+    table_df = pd.concat([reg_df,expected_df,remaining_df], axis=0)
+    return table_df
+
+def make_table(state1, state2):
+    PA_summary_table = tall_EN_df(state1)
+    FL_summary_table = tall_EN_df(state2)
+
+    PA_summary_table['State'] = 'Pennsylvania'
+    FL_summary_table['State'] = 'Florida'
+
+    summary_table = pd.concat([FL_summary_table,PA_summary_table])
+
+    summary_table = pd.pivot_table(summary_table, index=['Candidate'],  values=('Votes'), \
+                                columns=('State'), aggfunc=np.sum, margins=False).reset_index()
+    summary_table = summary_table.reindex([0,2,1])
+
+    summary_table['FL_pct'] = (summary_table.Florida / summary_table.Florida.sum() * 100)
+    summary_table['PA_pct'] = (summary_table.Pennsylvania / summary_table.Pennsylvania.sum() * 100)
+
+    summary_table = summary_table.append(summary_table.sum(numeric_only=True), ignore_index=True)
+    summary_table.at[3, 'Candidate'] = 'Total'
+
+    summary_table['Florida'] = summary_table['Florida'].map("{:,.0f}".format)
+    summary_table['Pennsylvania'] = summary_table['Pennsylvania'].map("{:,.0f}".format)
+    summary_table['FL_pct'] = summary_table['FL_pct'].map('{:,.2f}%'.format)
+    summary_table['PA_pct'] = summary_table['PA_pct'].map('{:,.2f}%'.format)
+
+    summary_table = summary_table[['Candidate','Florida','FL_pct','Pennsylvania','PA_pct']]
+
+    return summary_table
+    # fig = go.Figure(data=[go.Table(
+    #     header=dict(values=list(summary_table.columns),
+    #                 fill_color='paleturquoise',
+    #                 align='left'),
+    #     cells=dict(values=[summary_table.Candidate,summary_table.Florida,summary_table.FL_pct,
+    #                       summary_table.Pennsylvania,summary_table.PA_pct],
+    #                fill_color='lavender',
+    #                align='left'))
+    # ])
+
+    # fig.show()
+
+def make_vote_table(state1,state2):
+    PA_reg_table = tall_EN_df_reg(state1)
+    FL_reg_table = tall_EN_df_reg(state2)
+
+    PA_reg_table['State'] = 'Pennsylvania'
+    FL_reg_table['State'] = 'Florida'
+
+    reg_table = pd.concat([FL_reg_table,PA_reg_table])
+
+    reg_table = pd.pivot_table(reg_table, index=['Category'],  values=('Votes'), \
+                                columns=('State'), aggfunc=np.sum, margins=False).reset_index()
+
+    reg_table['Florida'] = reg_table['Florida'].map("{:,.0f}".format)
+    reg_table['Pennsylvania'] = reg_table['Pennsylvania'].map("{:,.0f}".format)
+
+    FL_turnout = str(((EN_FL_df['Total_Vote_16'].sum() / EN_FL_df['Reg_16_Total'].sum())*100).round(1)) + "%"
+    PA_turnout = str(((EN_PA_df['Total_Vote_16'].sum() / EN_PA_df['Reg_16_Total'].sum())*100).round(1)) + "%"
+
+    turnout = pd.DataFrame([['2016 Turnout',FL_turnout,PA_turnout]], columns = ['Category','Florida','Pennsylvania'])
+    reg_table = reg_table.append(turnout)
+
+    reg_table = reg_table.reset_index(drop=True)
+    return reg_table
 
 def stacked_bars(df):
     biden_vote_df = pd.DataFrame(df[['DEM_20_raw','COUNTY_CAT','County']])
@@ -122,7 +222,7 @@ def bubbles(df):
                         'NET_DEM_20_pct':'Biden Margin',
                         'NET_DEM_16_pct':'Clinton Margin',
                         'Expected_20_Vote_Remaining':'Expected Votes Remaining',
-                        'Proj_Winner':'Projected Winner',
+                        # 'Proj_Winner':'Projected Winner',
                         'Total_Vote_20':'Total Votes Counted'
                      },
                     hover_data={
@@ -131,9 +231,10 @@ def bubbles(df):
                        'NET_DEM_16_pct':':+.3p',
                        'Total_Vote_20':':,.0f',
                        'Expected_20_Vote_Remaining':':,.0f',
-                       'Proj_Winner':True
+                       # 'Proj_Winner':True
                      },
-                     template='plotly_white')                 
+                    title="2020 Vote Against 2016 Margins", 
+                    template='plotly_white')                 
 
     fig.update_layout(
         hoverlabel=dict(
@@ -158,13 +259,13 @@ def choropleth(df, lat, lon, zoom):
                                            'NET_DEM_20_pct':':+.3p',
                                            'Total_Vote_20':':,.0f',
                                            'Expected_20_Vote_Remaining':':,.0f',
-                                           'Proj_Winner':True
+                                           # 'Proj_Winner':True
                                           },
                                labels={'NET_DEM_20_pct':'Biden Margin',
                                       'COUNTY_CAT':'Category',
                                       'Total_Vote_20':'Votes Counted',
-                                      'Expected_20_Vote_Remaining':'Expected Votes Remaining',
-                                      'Proj_Winner':'Projected Winner'}
+                                      'Expected_20_Vote_Remaining':'Expected Votes Remaining'}
+                                      # 'Proj_Winner':'Projected Winner'}
                               )
 
     fig.update_layout(
@@ -188,6 +289,22 @@ def choropleth(df, lat, lon, zoom):
 PA_map_detail = [41.203323,-77.194527,6]
 FL_map_detail = [27.664827,-81.515755,5]
 
+
+@app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
+              [Input('interval-component', 'n_intervals')])
+def summary_table(n):
+    the_table = make_table(EN_PA_df,EN_FL_df)
+    data=the_table.to_dict('records')
+    columns=[{"name": i, "id": i} for i in the_table.columns]
+    return data, columns
+
+@app.callback([Output("vote-table", "data"), Output('vote-table', 'columns')],
+              [Input('interval-component', 'n_intervals')])
+def vote_table(n):
+    vote_table = make_vote_table(EN_PA_df,EN_FL_df)
+    data=vote_table.to_dict('records')
+    columns=[{"name": i, "id": i} for i in vote_table.columns]
+    return data, columns
 
 @app.callback(Output('florida-map', 'figure'),
               [Input('interval-component', 'n_intervals')])
@@ -225,25 +342,39 @@ def penn_bubbles(n):
     bubbles_fig_PA = bubbles(EN_PA_df)
     return bubbles_fig_PA
 
+@app.callback(Output('live-update-text', 'children'),
+              [Input('interval-component', 'n_intervals')])
+def update_refresh_timestamp(n):
+    timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
+    return "Data refreshes every 5 minutes. Last updated: %s" % timestamp
+
 # map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
 # map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
 # stacked_fig_PA = stacked_bars(EN_PA_df)
 # stacked_fig_FL = stacked_bars(EN_FL_df)
 # bubbles_fig_FL = bubbles(EN_FL_df)
 # bubbles_fig_PA = bubbles(EN_PA_df)
-
+# the_table = make_table(EN_PA_df,EN_FL_df)
 
 def make_layout():
     return html.Div(children=[
         html.H1(children='2020 Election Night Dashboard'),
             html.Div([dcc.Markdown(
                 """
-                Welcome to my geocities page. I will update this text later with some detail of what you are seeing.
+                hello! This will be a live, auto-refreshing dashboard on Election Night for Florida and Pennsylvania vote returns. Some old data is loaded in now (2016 general for Florida, 2020 primary for PA) although the auto-refresh is working!
+
+                The bubble charts show total votes (size of bubbles) by county; colors represents trend from 2012 to 2016: Solid Blue (Obama/Clinton), Solid Red (Romney/Trump), or Swing (Romney/Clinton or Obama/Trump, as indicated). The Y axis represent's Hillary's 2016 margin; the X axis will represent Biden's margin on election night. 
+
+                The stacked bar chart will show total votes for each candidate by County; color again represents 2012-2016 trend. Remaining votes are a simple estimate of expected votes--at the County level, it calculates: (2020 Total Votes) - (2016 County Turnout % * 2020 County Registered Voters). Final voter registration data has not been updated as of 10/11. 
                 """
             ),
-                html.P([html.Small("You might find some more context on my twitter "), html.A(html.Small("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter"), html.Small(".")]),
+                html.P([html.Small("Find me on Twitter "), html.A(html.Small("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter"), html.Small(".")]),
         ]),
         html.Div(id='live-update-text'),
+        dash_table.DataTable(id='the-table', columns=[],
+            data=[]),
+        dash_table.DataTable(id='vote-table', columns=[],
+            data=[]),
         html.Div(children='''
             Florida.
         '''),
@@ -276,7 +407,7 @@ def make_layout():
         ),
         dcc.Interval(
             id='interval-component',
-            interval=1*1000*60*2,#*60*5, # 5 minutes in milliseconds
+            interval=1*1000*60*5, # 5 minutes in milliseconds
             n_intervals=0
         ),
         html.Div([dcc.Markdown(
@@ -289,24 +420,7 @@ def make_layout():
 
 app.title = 'Election 2020 Dashboard'
 app.layout = make_layout
-# @app.callback(Output('live-update-text', 'children'),
-#               [Input('interval-component', 'n_intervals')])
-# def update_time_and_data(n):
-    # timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
 
-    # un-comment these rows to resume live updates from the web!!
-    #election_night_data_FL = update_FL(url_FL)
-    #election_night_data_PA = update_PA(url_PA)
-
-    # process election night data into full table
-    #full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
-    #full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
-
-    #full_table_EN_FL.to_csv("florida_dash.csv", index_label='CountyName') 
-    #full_table_EN_PA.to_csv("penn_dash.csv", index_label='CountyName') 
-    ## end un-comment
-
-    # return "Updates every 5 minutes. Last updated: %s" % timestamp
 
 if __name__ == '__main__':
     app.run_server(debug=True)
