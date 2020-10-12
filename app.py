@@ -21,6 +21,7 @@ import plotly.express as px
 import requests 
 import xml.etree.ElementTree as ET
 import time
+import pytz
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 s3 = boto3.resource('s3')
@@ -345,7 +346,8 @@ def penn_bubbles(n):
 @app.callback(Output('live-update-text', 'children'),
               [Input('interval-component', 'n_intervals')])
 def update_refresh_timestamp(n):
-    timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
+    timezone = pytz.timezone("US/Eastern")
+    timestamp = datetime.now().astimezone(timezone).strftime("%I:%M%p US/Eastern %b %d %Y")
     return "Data refreshes every 5 minutes. Last updated: %s" % timestamp
 
 # map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
