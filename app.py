@@ -428,30 +428,30 @@ def make_layout():
             id='florida-stacked'#,
             # figure=stacked_fig_FL
         ),
-        # html.H2(children='''
-        #     Pennsylvania.
-        # '''),    
-        # dcc.Graph(
-        #     id='penn-map'#,
-        #     # figure=map_PA
-        # ),
-        # dcc.Graph(
-        #     id='penn-bubbles'#,
-        #     # figure=bubbles_fig_PA
-        # ),
-        # html.H4(children='''
-        #     Select Y-axis for Bubble Chart:
-        # '''),    
-        # dcc.RadioItems(id='pa_radio',
-        #     options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-        #     value='2016',
-        #     labelStyle={'display': 'inline-block'}
+        html.H2(children='''
+            Pennsylvania.
+        '''),    
+        dcc.Graph(
+            id='penn-map'#,
+            # figure=map_PA
+        ),
+        dcc.Graph(
+            id='penn-bubbles'#,
+            # figure=bubbles_fig_PA
+        ),
+        html.H4(children='''
+            Select Y-axis for Bubble Chart:
+        '''),    
+        dcc.RadioItems(id='pa_radio',
+            options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+            value='2016',
+            labelStyle={'display': 'inline-block'}
   
-        # ),
-        # dcc.Graph(
-        #     id='penn-stacked'#,
-        #     # figure=stacked_fig_PA
-        # ),
+        ),
+        dcc.Graph(
+            id='penn-stacked'#,
+            # figure=stacked_fig_PA
+        ),
         dcc.Interval(
             id='interval-component',
             interval=1*1000*60*5, # 5 minutes in milliseconds
