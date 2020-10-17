@@ -55,8 +55,8 @@ def get_new_data_every(period=UPDATE_INTERVAL):
         print("data updated %s" % timestamp)
         time.sleep(period)
 
-get_new_data_PA()
-get_new_data_FL()
+# get_new_data_PA()
+# get_new_data_FL()
 # Run the function in another thread
 executor = ThreadPoolExecutor(max_workers=1)
 executor.submit(get_new_data_every)
@@ -66,7 +66,7 @@ executor.submit(get_new_data_every)
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
 
-external_stylesheets = ['https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/light.min.css']
+external_stylesheets = ['https://cdn.jsdelivr.net/npm/water.css@2/out/light.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
@@ -211,8 +211,15 @@ def stacked_bars(df):
 
     return fig
 
-def bubbles(df):
-    fig = px.scatter(df, x="NET_DEM_20_pct", y="NET_DEM_16_pct",
+def bubbles(df, y_year):
+    if y_year == '2012':
+        y_data = 'NET_DEM_12_pct'
+        y_label = 'Obama Margin'
+    elif y_year == '2016':
+        y_data = 'NET_DEM_16_pct'
+        y_label = 'Clinton Margin'
+
+    fig = px.scatter(df, x="NET_DEM_20_pct", y=y_data,
                      size="Total_Vote_20", color="COUNTY_CAT",
                      color_discrete_map={ # replaces default color mapping by value
                         "SOLID BLUE":"rgb(51,153,255)", "SOLID RED":"rgb(255,102,102)",
@@ -221,7 +228,7 @@ def bubbles(df):
                      hover_name="County", size_max=60,
                      labels={'COUNTY_CAT':'Category',
                         'NET_DEM_20_pct':'Biden Margin',
-                        'NET_DEM_16_pct':'Clinton Margin',
+                        y_data:y_label,
                         'Expected_20_Vote_Remaining':'Expected Votes Remaining',
                         # 'Proj_Winner':'Projected Winner',
                         'Total_Vote_20':'Total Votes Counted'
@@ -229,12 +236,12 @@ def bubbles(df):
                     hover_data={
                        'COUNTY_CAT':True,
                        'NET_DEM_20_pct':':+.3p',
-                       'NET_DEM_16_pct':':+.3p',
+                       y_data:':+.3p',
                        'Total_Vote_20':':,.0f',
                        'Expected_20_Vote_Remaining':':,.0f',
                        # 'Proj_Winner':True
                      },
-                    title="2020 Vote Against 2016 Margins", 
+                    title="2020 Vote Against %s Margins" % y_year, 
                     template='plotly_white')                 
 
     fig.update_layout(
@@ -291,6 +298,7 @@ PA_map_detail = [41.203323,-77.194527,6]
 FL_map_detail = [27.664827,-81.515755,5]
 
 
+
 @app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
               [Input('interval-component', 'n_intervals')])
 def summary_table(n):
@@ -332,15 +340,17 @@ def fl_stacked(n):
     return stacked_fig_FL
 
 @app.callback(Output('florida-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def fl_bubbles(n):
-    bubbles_fig_FL = bubbles(EN_FL_df)
+              [Input('interval-component', 'n_intervals')],
+              [Input('fl_radio', 'value')])
+def fl_bubbles(n, fl_radio):
+    bubbles_fig_FL = bubbles(EN_FL_df, fl_radio)
     return bubbles_fig_FL
 
 @app.callback(Output('penn-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def penn_bubbles(n):
-    bubbles_fig_PA = bubbles(EN_PA_df)
+              [Input('interval-component', 'n_intervals')],
+              [Input('pa_radio', 'value')])
+def penn_bubbles(n, pa_radio):
+    bubbles_fig_PA = bubbles(EN_PA_df, pa_radio)
     return bubbles_fig_PA
 
 @app.callback(Output('live-update-text', 'children'),
@@ -358,26 +368,44 @@ def update_refresh_timestamp(n):
 # bubbles_fig_PA = bubbles(EN_PA_df)
 # the_table = make_table(EN_PA_df,EN_FL_df)
 
+
 def make_layout():
     return html.Div(children=[
-        html.H1(children='2020 Election Night Dashboard'),
+        html.H1(children='Grackle.Live 2020 Election Night Dashboard'),
             html.Div([dcc.Markdown(
                 """
-                hello! This will be a live, auto-refreshing dashboard on Election Night for Florida and Pennsylvania vote returns. Some old data is loaded in now (2016 general for Florida, 2020 primary for PA) although the auto-refresh is working!
+                _Grackle.Live will have the best real-time data analytics on Election Night 2020._ 
 
-                The bubble charts show total votes (size of bubbles) by county; colors represents trend from 2012 to 2016: Solid Blue (Obama/Clinton), Solid Red (Romney/Trump), or Swing (Romney/Clinton or Obama/Trump, as indicated). The Y axis represent's Hillary's 2016 margin; the X axis will represent Biden's margin on election night. 
+                On this page you'll find dashboards for Florida and Pennsylvania with live presidential election results.
 
-                The stacked bar chart will show total votes for each candidate by County; color again represents 2012-2016 trend. Remaining votes are a simple estimate of expected votes--at the County level, it calculates: (2020 Total Votes) - (2016 County Turnout % * 2020 County Registered Voters). Final voter registration data has not been updated as of 10/11. 
+                For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
-            ),
-                html.P([html.Small("Find me on Twitter "), html.A(html.Small("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter"), html.Small(".")]),
+            )
         ]),
         html.Div(id='live-update-text'),
         dash_table.DataTable(id='the-table', columns=[],
-            data=[]),
+            data=[], style_as_list_view=True,     
+            style_header={
+                'backgroundColor': 'light-grey',
+                'fontWeight': 'bold'},
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': c},
+                    'fontWeight': 'bold'
+                } for c in ['Candidate']]
+        ),
         dash_table.DataTable(id='vote-table', columns=[],
-            data=[]),
-        html.Div(children='''
+            data=[], style_as_list_view=True,
+            style_header={
+                'backgroundColor': 'light-grey',
+                'fontWeight': 'bold'},
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': c},
+                    'fontWeight': 'bold'
+                } for c in ['Category']]
+        ),
+        html.H2(children='''
             Florida.
         '''),
         dcc.Graph(
@@ -388,39 +416,63 @@ def make_layout():
             id='florida-bubbles'#,
             # figure=bubbles_fig_FL
         ),
+        html.H4(children='''
+            Select Y-axis for Bubble Chart:
+        '''),    
+        dcc.RadioItems(id='fl_radio',
+            options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+            value='2016',
+            labelStyle={'display': 'inline-block'}
+        ),  
         dcc.Graph(
             id='florida-stacked'#,
             # figure=stacked_fig_FL
         ),
-        html.Div(children='''
-            Pennsylvania.
-        '''),    
-        dcc.Graph(
-            id='penn-map'#,
-            # figure=map_PA
-        ),
-        dcc.Graph(
-            id='penn-bubbles'#,
-            # figure=bubbles_fig_PA
-        ),
-        dcc.Graph(
-            id='penn-stacked'#,
-            # figure=stacked_fig_PA
-        ),
+        # html.H2(children='''
+        #     Pennsylvania.
+        # '''),    
+        # dcc.Graph(
+        #     id='penn-map'#,
+        #     # figure=map_PA
+        # ),
+        # dcc.Graph(
+        #     id='penn-bubbles'#,
+        #     # figure=bubbles_fig_PA
+        # ),
+        # html.H4(children='''
+        #     Select Y-axis for Bubble Chart:
+        # '''),    
+        # dcc.RadioItems(id='pa_radio',
+        #     options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+        #     value='2016',
+        #     labelStyle={'display': 'inline-block'}
+  
+        # ),
+        # dcc.Graph(
+        #     id='penn-stacked'#,
+        #     # figure=stacked_fig_PA
+        # ),
         dcc.Interval(
             id='interval-component',
             interval=1*1000*60*5, # 5 minutes in milliseconds
             n_intervals=0
         ),
-        html.Div([dcc.Markdown(
+        html.H2(children=
             """
-            Closing text and detail here.
-            """  
-        )]),
+            Contact Information:
 
+            """  
+        ),
+        html.P([html.Big("Email: "), html.A(html.Big("grackle@grackle.live"), href="mailto:grackle@grackle.live", title="email")]),
+        html.P([html.Big("Twitter: "), html.A(html.Big("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter")]),
+        html.P([html.Big("GitHub: "), html.A(html.Big("@greg_ingcogneato"), href="https://github.com/greg-incogneato", title="github")]),
+        html.P([html.Big("FAQ: "), html.A(html.Big("about.grackle.live"), href="https://about.grackle.live", title="faq")])
     ])
 
-app.title = 'Election 2020 Dashboard'
+
+
+
+app.title = 'Grackle.Live'
 app.layout = make_layout
 
 
