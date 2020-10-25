@@ -378,6 +378,8 @@ def make_layout():
 
                 On this page you'll find dashboards for Florida and Pennsylvania with live presidential election results.
 
+                NOTE: Dashboards are currently populated with data from previous elections for display purposes, although the labels (candidate names) are set up for next week. 
+
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
             )
