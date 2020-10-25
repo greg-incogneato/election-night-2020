@@ -465,7 +465,7 @@ def make_layout():
         ),
         html.P([html.Big("Email: "), html.A(html.Big("grackle@grackle.live"), href="mailto:grackle@grackle.live", title="email")]),
         html.P([html.Big("Twitter: "), html.A(html.Big("@grackle_shmackl"), href="https://twitter.com/grackle_shmackl", title="twitter")]),
-        html.P([html.Big("GitHub: "), html.A(html.Big("@greg_ingcogneato"), href="https://github.com/greg-incogneato", title="github")]),
+        html.P([html.Big("GitHub: "), html.A(html.Big("@greg_incogneato"), href="https://github.com/greg-incogneato", title="github")]),
         html.P([html.Big("FAQ: "), html.A(html.Big("about.grackle.live"), href="https://about.grackle.live", title="faq")])
     ])
 
