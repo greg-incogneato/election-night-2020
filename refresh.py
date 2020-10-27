@@ -24,13 +24,25 @@ fl_hist_df = pd.read_csv(fl_hist,  index_col=0)
 penn_hist = 'https://en2020.s3.amazonaws.com/penn_hist.csv'
 penn_hist_df = pd.read_csv(penn_hist,  index_col=0)
 
+# get MI data
+mich_hist = 'https://en2020.s3.amazonaws.com/mich_hist.csv'
+mich_hist_df = pd.read_csv(mich_hist,  index_col=0)
+
 # update FL url on election night
 url_FL_live = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
-
 url_FL = 'https://en2020.s3.amazonaws.com/FL_data_live.txt'
+
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
 url_PA_live = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=23&FeedName=2020+Primary+Election+by+County'
 url_PA = 'https://en2020.s3.amazonaws.com/PA_data_live.xml'
+
+# https://www.michigan.gov/sos/0,4670,7-127-1633_8722---,00.html
+url_MI_live = 'https://mielections.us/election/results/DATA/2016GEN_MI_CENR_BY_COUNTY.xls'
+url_MI = 'https://en2020.s3.amazonaws.com/MI_data_live.txt'
+
+request_header = {
+  "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
+  "X-Requested-With": "XMLHttpRequest"}
 
 # function strips white space from downloaded text file
 def read_csv_regex(data, date_columns=[]):
@@ -84,6 +96,26 @@ def update_FL(input_url):
 
     return election_night_data_FL
 
+def update_MI(input_url):
+
+    resp = requests.get(input_url, headers=request_header)
+
+    # first write the MI data to s3, then read the file that was just written
+    # different than FL method since the data feed posts a XLS file that is actually a text file, which is weird
+    # so this needs to write the text somewhere (similar to how we handle XML in PA) then read it
+    with open('MI_data_live.txt', 'wb') as f: 
+        f.write(resp.content) 
+    s3.Bucket('en2020').put_object(Key='MI_data_live.txt', Body=resp.content,  ACL='public-read')
+
+    election_night_data_MI = read_csv_regex(url_MI, ['ElectionDate'])
+    
+    # write FL data from election feed to s3
+    # csv_buffer_FL_live = StringIO()
+    # election_night_data_FL.to_csv(csv_buffer_FL_live)
+    # s3.Object('en2020', 'FL_data_live.txt').put(Body=csv_buffer_FL_live.getvalue(), ACL='public-read')
+
+    return election_night_data_MI
+
 def update_PA(input_url):
 
     resp = requests.get(input_url) 
@@ -136,6 +168,11 @@ def update_PA(input_url):
 
 def process_live_file(live_df, hist_df, state):
     # process dataframe
+    # rename party column for MI to match function; add RaceCode column with PRE for President rows
+    if state == "MI":
+        live_df = live_df.rename({"PartyName": "PartyCode", "CandidateVotes": "CanVotes"}, axis='columns')
+        live_df.loc[live_df['OfficeDescription'] == 'President of the United States 4 Year Term (1) Position', 'RaceCode'] = 'PRE'  
+
     live_df['PartyCode3'] = live_df.apply(condense_third_parties, axis=1)
     
     potus_20_raw = pd.pivot_table(live_df[(live_df.RaceCode == 'PRE')], \
@@ -186,9 +223,12 @@ def refresh_live_data():
     # un-comment these rows to resume live updates from the web!!
     election_night_data_FL = update_FL(url_FL_live)
     election_night_data_PA = update_PA(url_PA_live)
+    election_night_data_MI = update_MI(url_MI_live)
+
     # process election night data into full table
     full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
     full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
+    full_table_EN_MI = process_live_file(election_night_data_MI, mich_hist_df, 'MI')
 
     full_table_EN_FL.index.name = 'CountyName'
     csv_buffer_FL = StringIO()
@@ -199,6 +239,12 @@ def refresh_live_data():
     csv_buffer_PA = StringIO()
     full_table_EN_PA.to_csv(csv_buffer_PA)
     s3.Object('en2020', 'penn_dash.csv').put(Body=csv_buffer_PA.getvalue(), ACL='public-read')
+
+    full_table_EN_MI.index.name = 'CountyName'
+    csv_buffer_MI = StringIO()
+    full_table_EN_MI.to_csv(csv_buffer_MI)
+    s3.Object('en2020', 'mich_dash.csv').put(Body=csv_buffer_MI.getvalue(), ACL='public-read')
+
     # end un-comment
 
 refresh_live_data()
