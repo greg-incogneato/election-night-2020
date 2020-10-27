@@ -253,7 +253,7 @@ def bubbles(df, y_year, statename):
                     hover_data={
                        'COUNTY_CAT':True,
                        'NET_DEM_20_pct':':+.3p',
-                       y_data:':+.3p',
+                       y_data:':+.2p',
                        'Total_Vote_20':':,.0f',
                        'Expected_20_Vote_Remaining':':,.0f',
                        # 'Proj_Winner':True
@@ -411,7 +411,7 @@ def make_layout():
                 """
                 _Grackle.Live will have the best real-time data analytics on Election Night 2020._ 
 
-                On this page you'll find dashboards for Florida and Pennsylvania with live presidential election results.
+                On this page you'll find dashboards for Florida, Pennsylvania and Michigan with live presidential election results.
 
                 NOTE: Dashboards are currently populated with data from previous elections for display purposes, although the labels (candidate names) are set up for next week. 
 
