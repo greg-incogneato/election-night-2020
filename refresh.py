@@ -2,7 +2,7 @@
 import boto3
 from datetime import datetime
 from urllib.request import urlopen
-from io import StringIO
+from io import StringIO, BytesIO
 import io
 import numpy as np
 import pandas as pd
@@ -10,6 +10,7 @@ import plotly.express as px
 import requests 
 import xml.etree.ElementTree as ET
 import time
+from zipfile import ZipFile
 
 s3 = boto3.resource('s3')
 
@@ -28,6 +29,10 @@ penn_hist_df = pd.read_csv(penn_hist,  index_col=0)
 mich_hist = 'https://en2020.s3.amazonaws.com/mich_hist.csv'
 mich_hist_df = pd.read_csv(mich_hist,  index_col=0)
 
+# get NC data
+ncar_hist = 'https://en2020.s3.amazonaws.com/ncar_hist.csv'
+ncar_hist_df = pd.read_csv(ncar_hist,  index_col=0)
+
 # update FL url on election night
 url_FL_live = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
 url_FL = 'https://en2020.s3.amazonaws.com/FL_data_live.txt'
@@ -39,6 +44,10 @@ url_PA = 'https://en2020.s3.amazonaws.com/PA_data_live.xml'
 # https://www.michigan.gov/sos/0,4670,7-127-1633_8722---,00.html
 url_MI_live = 'https://mielections.us/election/results/DATA/2016GEN_MI_CENR_BY_COUNTY.xls'
 url_MI = 'https://en2020.s3.amazonaws.com/MI_data_live.txt'
+
+# no need to update NC - this is it!!
+url_NC_live = 'http://dl.ncsbe.gov/ENRS/2020_11_03/results_pct_20201103.zip'
+url_NC = 'https://en2020.s3.amazonaws.com/NC_data_live.txt'
 
 request_header = {
   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
@@ -116,6 +125,24 @@ def update_MI(input_url):
 
     return election_night_data_MI
 
+def update_NC(input_url):
+    resp = requests.get(input_url, headers=request_header)
+    NC_filename = 'results_pct_20201103.txt'
+
+    buffer = ZipFile(BytesIO(resp.content))
+
+    s3.meta.client.upload_fileobj(
+            buffer.open(NC_filename),
+            Bucket='en2020',
+            Key='NC_data_live.txt',
+            ExtraArgs={'ACL':'public-read'}
+        )
+
+    election_night_data_NC = read_csv_regex(url_NC, ['Election Date'])
+
+    return election_night_data_NC
+
+
 def update_PA(input_url):
 
     resp = requests.get(input_url) 
@@ -173,6 +200,10 @@ def process_live_file(live_df, hist_df, state):
         live_df = live_df.rename({"PartyName": "PartyCode", "CandidateVotes": "CanVotes"}, axis='columns')
         live_df.loc[live_df['OfficeDescription'] == 'President of the United States 4 Year Term (1) Position', 'RaceCode'] = 'PRE'  
 
+    if state == "NC":
+        live_df = live_df.rename({"County": "CountyName","Choice Party": "PartyCode", "Total Votes": "CanVotes"}, axis='columns')
+        live_df.loc[live_df['Contest Name'] == 'US PRESIDENT', 'RaceCode'] = 'PRE'  
+
     live_df['PartyCode3'] = live_df.apply(condense_third_parties, axis=1)
     
     potus_20_raw = pd.pivot_table(live_df[(live_df.RaceCode == 'PRE')], \
@@ -224,11 +255,13 @@ def refresh_live_data():
     election_night_data_FL = update_FL(url_FL_live)
     election_night_data_PA = update_PA(url_PA_live)
     election_night_data_MI = update_MI(url_MI_live)
+    election_night_data_NC = update_NC(url_NC_live)
 
     # process election night data into full table
     full_table_EN_FL = process_live_file(election_night_data_FL, fl_hist_df, "FL")
     full_table_EN_PA = process_live_file(election_night_data_PA, penn_hist_df, 'PA')
     full_table_EN_MI = process_live_file(election_night_data_MI, mich_hist_df, 'MI')
+    full_table_EN_NC = process_live_file(election_night_data_NC, ncar_hist_df, 'NC')
 
     full_table_EN_FL.index.name = 'CountyName'
     csv_buffer_FL = StringIO()
@@ -244,6 +277,11 @@ def refresh_live_data():
     csv_buffer_MI = StringIO()
     full_table_EN_MI.to_csv(csv_buffer_MI)
     s3.Object('en2020', 'mich_dash.csv').put(Body=csv_buffer_MI.getvalue(), ACL='public-read')
+
+    full_table_EN_NC.index.name = 'CountyName'
+    csv_buffer_NC = StringIO()
+    full_table_EN_NC.to_csv(csv_buffer_NC)
+    s3.Object('en2020', 'ncar_dash.csv').put(Body=csv_buffer_NC.getvalue(), ACL='public-read')
 
     # end un-comment
 

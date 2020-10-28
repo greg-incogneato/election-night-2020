@@ -49,6 +49,12 @@ def get_new_data_MI():
     EN_MI_df = pd.read_csv('https://en2020.s3.amazonaws.com/mich_dash.csv')
     EN_MI_df['County'] = EN_MI_df.CountyName  
 
+def get_new_data_NC():
+    """Updates the global variable 'data' with new data"""
+    global EN_NC_df
+    EN_NC_df = pd.read_csv('https://en2020.s3.amazonaws.com/ncar_dash.csv')
+    EN_NC_df['County'] = EN_NC_df.CountyName  
+
 def get_new_data_every(period=UPDATE_INTERVAL):
     """Update the data every 'period' seconds"""
     while True:
@@ -58,6 +64,7 @@ def get_new_data_every(period=UPDATE_INTERVAL):
         get_new_data_PA()
         get_new_data_FL()
         get_new_data_MI()
+        get_new_data_NC()
         timestamp = datetime.now().strftime("%I:%M%p %z %b %d %Y")
         print("data updated %s" % timestamp)
         time.sleep(period)
@@ -115,36 +122,41 @@ def tall_EN_df_reg(df):
     table_df = pd.concat([reg_df,expected_df,remaining_df], axis=0)
     return table_df
 
-def make_table(state1, state2, state3):
+def make_table(state1, state2, state3, state4):
     PA_summary_table = tall_EN_df(state1)
     FL_summary_table = tall_EN_df(state2)
     MI_summary_table = tall_EN_df(state3)
+    NC_summary_table = tall_EN_df(state4)
 
-    PA_summary_table['State'] = 'Pennsylvania'
+    PA_summary_table['State'] = 'Penn'
     FL_summary_table['State'] = 'Florida'
     MI_summary_table['State'] = 'Michigan'
+    NC_summary_table['State'] = 'NCarolina'
 
-    summary_table = pd.concat([FL_summary_table,PA_summary_table,MI_summary_table])
+    summary_table = pd.concat([FL_summary_table,PA_summary_table,MI_summary_table,NC_summary_table])
 
     summary_table = pd.pivot_table(summary_table, index=['Candidate'],  values=('Votes'), \
                                 columns=('State'), aggfunc=np.sum, margins=False).reset_index()
     summary_table = summary_table.reindex([0,2,1])
 
     summary_table['FL_pct'] = (summary_table.Florida / summary_table.Florida.sum() * 100)
-    summary_table['PA_pct'] = (summary_table.Pennsylvania / summary_table.Pennsylvania.sum() * 100)
+    summary_table['PA_pct'] = (summary_table.Penn / summary_table.Penn.sum() * 100)
     summary_table['MI_pct'] = (summary_table.Michigan / summary_table.Michigan.sum() * 100)
+    summary_table['NC_pct'] = (summary_table.NCarolina / summary_table.NCarolina.sum() * 100)
 
     summary_table = summary_table.append(summary_table.sum(numeric_only=True), ignore_index=True)
     summary_table.at[3, 'Candidate'] = 'Total'
 
     summary_table['Florida'] = summary_table['Florida'].map("{:,.0f}".format)
-    summary_table['Pennsylvania'] = summary_table['Pennsylvania'].map("{:,.0f}".format)
+    summary_table['Penn'] = summary_table['Penn'].map("{:,.0f}".format)
     summary_table['Michigan'] = summary_table['Michigan'].map("{:,.0f}".format)
+    summary_table['NCarolina'] = summary_table['NCarolina'].map("{:,.0f}".format)
     summary_table['FL_pct'] = summary_table['FL_pct'].map('{:,.2f}%'.format)
     summary_table['PA_pct'] = summary_table['PA_pct'].map('{:,.2f}%'.format)
     summary_table['MI_pct'] = summary_table['MI_pct'].map('{:,.2f}%'.format)
+    summary_table['NC_pct'] = summary_table['NC_pct'].map('{:,.2f}%'.format)
 
-    summary_table = summary_table[['Candidate','Florida','FL_pct','Pennsylvania','PA_pct','Michigan','MI_pct']]
+    summary_table = summary_table[['Candidate','Florida','FL_pct','Penn','PA_pct','Michigan','MI_pct','NCarolina','NC_pct']]
 
     return summary_table
     # fig = go.Figure(data=[go.Table(
@@ -159,16 +171,18 @@ def make_table(state1, state2, state3):
 
     # fig.show()
 
-def make_vote_table(state1,state2,state3):
+def make_vote_table(state1,state2,state3,state4):
     PA_reg_table = tall_EN_df_reg(state1)
     FL_reg_table = tall_EN_df_reg(state2)
     MI_reg_table = tall_EN_df_reg(state3)
+    NC_reg_table = tall_EN_df_reg(state4)
 
     PA_reg_table['State'] = 'Pennsylvania'
     FL_reg_table['State'] = 'Florida'
     MI_reg_table['State'] = 'Michigan'
+    NC_reg_table['State'] = 'NorthCarolina'
 
-    reg_table = pd.concat([FL_reg_table,PA_reg_table,MI_reg_table])
+    reg_table = pd.concat([FL_reg_table,PA_reg_table,MI_reg_table,NC_reg_table])
 
     reg_table = pd.pivot_table(reg_table, index=['Category'],  values=('Votes'), \
                                 columns=('State'), aggfunc=np.sum, margins=False).reset_index()
@@ -176,16 +190,18 @@ def make_vote_table(state1,state2,state3):
     reg_table['Florida'] = reg_table['Florida'].map("{:,.0f}".format)
     reg_table['Pennsylvania'] = reg_table['Pennsylvania'].map("{:,.0f}".format)
     reg_table['Michigan'] = reg_table['Michigan'].map("{:,.0f}".format)
+    reg_table['NorthCarolina'] = reg_table['NorthCarolina'].map("{:,.0f}".format)
 
     FL_turnout = str(((EN_FL_df['Total_Vote_16'].sum() / EN_FL_df['Reg_16_Total'].sum())*100).round(1)) + "%"
     PA_turnout = str(((EN_PA_df['Total_Vote_16'].sum() / EN_PA_df['Reg_16_Total'].sum())*100).round(1)) + "%"
     MI_turnout = str(((EN_MI_df['Total_Vote_16'].sum() / EN_MI_df['Reg_16_Total'].sum())*100).round(1)) + "%"
+    NC_turnout = str(((EN_NC_df['Total_Vote_16'].sum() / EN_NC_df['Reg_16_Total'].sum())*100).round(1)) + "%"
 
-    turnout = pd.DataFrame([['2016 Turnout',FL_turnout,PA_turnout,MI_turnout]], columns = ['Category','Florida','Pennsylvania','Michigan'])
+    turnout = pd.DataFrame([['2016 Turnout',FL_turnout,PA_turnout,MI_turnout,NC_turnout]], columns = ['Category','Florida','Pennsylvania','Michigan','NCarolina'])
     reg_table = reg_table.append(turnout)
 
     reg_table = reg_table.reset_index(drop=True)
-    reg_table = reg_table[['Category','Florida','Pennsylvania','Michigan']]
+    reg_table = reg_table[['Category','Florida','Pennsylvania','Michigan','NCarolina']]
     return reg_table
 
 def stacked_bars(df, statename):
@@ -314,11 +330,12 @@ def choropleth(df, lat, lon, zoom):
 PA_map_detail = [41.203323,-77.194527,6]
 FL_map_detail = [27.664827,-81.515755,5]
 MI_map_detail = [44.314842,-85.602364,5]
+NC_map_detail = [35.759575,-79.019302,5]
 
 @app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
               [Input('interval-component', 'n_intervals')])
 def summary_table(n):
-    the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df)
+    the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
     data=the_table.to_dict('records')
     columns=[{"name": i, "id": i} for i in the_table.columns]
     return data, columns
@@ -326,67 +343,68 @@ def summary_table(n):
 @app.callback([Output("vote-table", "data"), Output('vote-table', 'columns')],
               [Input('interval-component', 'n_intervals')])
 def vote_table(n):
-    vote_table = make_vote_table(EN_PA_df,EN_FL_df,EN_MI_df)
+    vote_table = make_vote_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
     data=vote_table.to_dict('records')
     columns=[{"name": i, "id": i} for i in vote_table.columns]
     return data, columns
 
-@app.callback(Output('florida-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def fl_map(n):
-    map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
-    return map_FL
-
-@app.callback(Output('penn-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def pa_map(n):
-    map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
-    return map_PA
-
-@app.callback(Output('mich-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def mi_map(n):
-    map_MI = choropleth(EN_MI_df, MI_map_detail[0], MI_map_detail[1], MI_map_detail[2])
-    return map_MI
-
-@app.callback(Output('penn-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def penn_stacked(n):
-    stacked_fig_PA = stacked_bars(EN_PA_df, "Pennsylvania")
-    return stacked_fig_PA
-
-@app.callback(Output('florida-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def fl_stacked(n):
-    stacked_fig_FL = stacked_bars(EN_FL_df, "Florida")
-    return stacked_fig_FL
-
-@app.callback(Output('mich-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def mi_stacked(n):
-    stacked_fig_MI = stacked_bars(EN_MI_df, "Michigan")
-    return stacked_fig_MI
-
-@app.callback(Output('florida-bubbles', 'figure'),
+@app.callback(Output('map', 'figure'),
               [Input('interval-component', 'n_intervals')],
-              [Input('fl_radio', 'value')])
-def fl_bubbles(n, fl_radio):
-    bubbles_fig_FL = bubbles(EN_FL_df, fl_radio, "Florida")
-    return bubbles_fig_FL
+              [Input('state_radio', 'value')])
+def map_all(n, state_radio):
 
-@app.callback(Output('penn-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')],
-              [Input('pa_radio', 'value')])
-def penn_bubbles(n, pa_radio):
-    bubbles_fig_PA = bubbles(EN_PA_df, pa_radio, 'Pennsylvania')
-    return bubbles_fig_PA
+    if state_radio == 'Florida':
+      map_fig = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
+    
+    elif state_radio == 'Pennsylvania':
+      map_fig = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
 
-@app.callback(Output('mich-bubbles', 'figure'),
+    elif state_radio == 'Michigan':
+      map_fig = choropleth(EN_MI_df, MI_map_detail[0], MI_map_detail[1], MI_map_detail[2])
+    
+    elif state_radio == 'North Carolina':
+      map_fig = choropleth(EN_NC_df, NC_map_detail[0], NC_map_detail[1], NC_map_detail[2])
+
+    return map_fig
+
+@app.callback(Output('stacked', 'figure'),
               [Input('interval-component', 'n_intervals')],
-              [Input('mi_radio', 'value')])
-def mich_bubbles(n, mi_radio):
-    bubbles_fig_MI = bubbles(EN_MI_df, mi_radio, 'Michigan')
-    return bubbles_fig_MI
+              [Input('state_radio', 'value')])
+def stacked_all(n, state_radio):
+
+    if state_radio == 'Florida':
+      stacked_fig = stacked_bars(EN_FL_df, "Florida")
+    
+    elif state_radio == 'Pennsylvania':
+      stacked_fig = stacked_bars(EN_PA_df, "Pennsylvania")
+
+    elif state_radio == 'Michigan':
+      stacked_fig = stacked_bars(EN_MI_df, "Michigan")
+
+    elif state_radio == 'North Carolina':
+      stacked_fig = stacked_bars(EN_NC_df, "North Carolina")
+
+    return stacked_fig
+
+
+@app.callback(Output('bubbles', 'figure'),
+              [Input('interval-component', 'n_intervals')],
+              [Input('bubble_radio', 'value')],
+              [Input('state_radio', 'value')])
+def bubbles_all(n, bubble_radio, state_radio):
+    if state_radio == 'Florida':
+      bubbles_fig = bubbles(EN_FL_df, bubble_radio, "Florida")
+    
+    elif state_radio == 'Pennsylvania':
+      bubbles_fig = bubbles(EN_PA_df, bubble_radio, "Pennsylvania")
+
+    elif state_radio == 'Michigan':
+      bubbles_fig = bubbles(EN_MI_df, bubble_radio, "Michigan")
+
+    elif state_radio == 'North Carolina':
+      bubbles_fig = bubbles(EN_NC_df, bubble_radio, "North Carolina")
+
+    return bubbles_fig
 
 @app.callback(Output('live-update-text', 'children'),
               [Input('interval-component', 'n_intervals')])
@@ -409,7 +427,7 @@ def make_layout():
         html.H1(children='Grackle.Live 2020 Election Night Dashboard'),
             html.Div([dcc.Markdown(
                 """
-                _Grackle.Live will have the best real-time data analytics on Election Night 2020._ 
+                _Grackle Live: Be the Early Bird._ 
 
                 On this page you'll find dashboards for Florida, Pennsylvania and Michigan with live presidential election results.
 
@@ -443,72 +461,31 @@ def make_layout():
                 } for c in ['Category']]
         ),
         html.H2(children='''
-            Florida.
-        '''),
+            Choose a state:
+        '''),    
+        dcc.RadioItems(id='state_radio',
+            options=[{'label': i, 'value': i} for i in ['Florida', 'Pennsylvania', 'Michigan', "North Carolina"]],
+            value='Florida',
+            labelStyle={'display': 'inline-block'}
+        ),  
         dcc.Graph(
-            id='florida-map'#,
+            id='map'#,
             #figure=map_FL
         ),
         dcc.Graph(
-            id='florida-bubbles'#,
+            id='bubbles'#,
             # figure=bubbles_fig_FL
         ),
         html.H4(children='''
             Select Y-axis for Bubble Chart:
         '''),    
-        dcc.RadioItems(id='fl_radio',
+        dcc.RadioItems(id='bubble_radio',
             options=[{'label': i, 'value': i} for i in ['2012', '2016']],
             value='2016',
             labelStyle={'display': 'inline-block'}
         ),  
         dcc.Graph(
-            id='florida-stacked'#,
-            # figure=stacked_fig_FL
-        ),
-        html.H2(children='''
-            Pennsylvania.
-        '''),    
-        dcc.Graph(
-            id='penn-map'#,
-            # figure=map_PA
-        ),
-        dcc.Graph(
-            id='penn-bubbles'#,
-            # figure=bubbles_fig_PA
-        ),
-        html.H4(children='''
-            Select Y-axis for Bubble Chart:
-        '''),    
-        dcc.RadioItems(id='pa_radio',
-            options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-            value='2016',
-            labelStyle={'display': 'inline-block'}
-        ),
-        dcc.Graph(
-            id='penn-stacked'#,
-            # figure=stacked_fig_PA
-        ),
-        html.H2(children='''
-            Michigan.
-        '''),    
-        dcc.Graph(
-            id='mich-map'#,
-            # figure=map_PA
-        ),
-        dcc.Graph(
-            id='mich-bubbles'#,
-            # figure=bubbles_fig_PA
-        ),
-        html.H4(children='''
-            Select Y-axis for Bubble Chart:
-        '''),    
-        dcc.RadioItems(id='mi_radio',
-            options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-            value='2016',
-            labelStyle={'display': 'inline-block'}
-        ),
-        dcc.Graph(
-            id='mich-stacked'#,
+            id='stacked'#,
             # figure=stacked_fig_FL
         ),
         dcc.Interval(
