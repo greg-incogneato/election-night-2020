@@ -20,8 +20,8 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 s3 = boto3.resource('s3')
 
-url_PA_live = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=23&FeedName=2020+Primary+Election+by+County'
-url_PA = 'https://en2020.s3.amazonaws.com/PA_data_live.xml'
+url_MI_live = 'https://mielections.us/election/results/DATA/2016GEN_MI_CENR_BY_COUNTY.xls'
+url_MI = 'https://en2020.s3.amazonaws.com/MI_data_live.xml'
 
 def update_PA(input_url):
 
@@ -79,4 +79,4 @@ def update_PA(input_url):
     EN_extract_df["RaceCode"].replace({"President of the United States": "PRE"}, inplace=True)
     return EN_extract_df
 
-update_PA(url_PA_live)
+update_PA(url_MI_live)

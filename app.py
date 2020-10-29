@@ -159,7 +159,7 @@ def update_refresh_timestamp(n):
 
 def make_layout():
     return html.Div(children=[
-        html.H1(children='Grackle.Live 2020 Election Night Dashboard'),
+        html.H1(children='Grackle Vision'),
             html.Div([dcc.Markdown(
                 """
                 _Grackle Live: Be the Early Bird._ 
@@ -201,7 +201,7 @@ def make_layout():
     ])
 
 
-app.title = 'Grackle.Live Vision'
+app.title = 'Grackle Vision'
 app.layout = make_layout
 
 
