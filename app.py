@@ -480,9 +480,6 @@ def make_layout():
         ),
         dcc.Tabs([
           dcc.Tab(label='Florida', children=[
-            html.H2(children='''
-                  Florida.
-              '''),
               dcc.Graph(
                   id='florida-map'#,
                   #figure=map_FL
@@ -505,9 +502,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='Pennsylvania', children=[
-              html.H2(children='''
-                  Pennsylvania.
-              '''),    
               dcc.Graph(
                   id='penn-map'#,
               ),
@@ -527,9 +521,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='Michigan', children=[
-              html.H2(children='''
-                  Michigan.
-              '''),    
               dcc.Graph(
                   id='mich-map'#,
               ),
@@ -549,9 +540,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='North Carolina', children=[
-              html.H2(children='''
-                  North Carolina.
-              '''),    
               dcc.Graph(
                   id='ncar-map'#,
               ),
