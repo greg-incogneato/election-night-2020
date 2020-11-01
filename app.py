@@ -449,6 +449,8 @@ def make_layout():
 
                 On this page you'll find dashboards for Florida, Pennsylvania, Michigan and North Carolina with live presidential election results.
 
+                Please be aware of how votes are being counted in each state. I have added notes to each state, but tl;dr: MI/PA counts on Election Night could look very GOP-favored since it will take much longer for these states to process absentee/early ballots. 
+
                 NOTE: Dashboards for FL, PA and MI are currently populated with data from previous elections for display purposes, although the labels (candidate names) are set up for next week. NC is blank and will not display data until Tuesday.
 
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
@@ -480,6 +482,14 @@ def make_layout():
         ),
         dcc.Tabs([
           dcc.Tab(label='Florida', children=[
+              html.H4(children='''
+                  Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
+                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
+              '''),    
+              dcc.Graph(
+                  id='florida-stacked'#,
+                  # figure=stacked_fig_FL
+              ),
               dcc.Graph(
                   id='florida-map'#,
                   #figure=map_FL
@@ -495,13 +505,16 @@ def make_layout():
                   options=[{'label': i, 'value': i} for i in ['2012', '2016']],
                   value='2016',
                   labelStyle={'display': 'inline-block'}
-              ),  
-              dcc.Graph(
-                  id='florida-stacked'#,
-                  # figure=stacked_fig_FL
               )
             ]),
           dcc.Tab(label='Pennsylvania', children=[
+              html.H4(children='''
+                  Pennsylvania Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
+                  several days. As more votes are counted, expect vote to shift towards Democrats. 
+              '''),    
+              dcc.Graph(
+                  id='penn-stacked'#,
+              ),
               dcc.Graph(
                   id='penn-map'#,
               ),
@@ -515,12 +528,16 @@ def make_layout():
                   options=[{'label': i, 'value': i} for i in ['2012', '2016']],
                   value='2016',
                   labelStyle={'display': 'inline-block'}
-              ),
-              dcc.Graph(
-                  id='penn-stacked'#,
               )
             ]),
           dcc.Tab(label='Michigan', children=[
+              html.H4(children='''
+                  Michigan Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
+                  several days. As more votes are counted, expect vote to shift towards Democrats. 
+              '''),    
+              dcc.Graph(
+                  id='mich-stacked'#,
+              ),
               dcc.Graph(
                   id='mich-map'#,
               ),
@@ -534,12 +551,16 @@ def make_layout():
                   options=[{'label': i, 'value': i} for i in ['2012', '2016']],
                   value='2016',
                   labelStyle={'display': 'inline-block'}
-              ),
-              dcc.Graph(
-                  id='mich-stacked'#,
               )
             ]),
           dcc.Tab(label='North Carolina', children=[
+              html.H4(children='''
+                  North Carolina Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
+                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
+              '''),    
+              dcc.Graph(
+                  id='ncar-stacked'#,
+              ),
               dcc.Graph(
                   id='ncar-map'#,
               ),
@@ -553,9 +574,6 @@ def make_layout():
                   options=[{'label': i, 'value': i} for i in ['2012', '2016']],
                   value='2016',
                   labelStyle={'display': 'inline-block'}
-              ),
-              dcc.Graph(
-                  id='ncar-stacked'#,
               )
             ])
         ]), 
