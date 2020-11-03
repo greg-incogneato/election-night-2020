@@ -332,13 +332,13 @@ FL_map_detail = [27.664827,-81.515755,5]
 MI_map_detail = [44.314842,-85.602364,5]
 NC_map_detail = [35.759575,-79.019302,5]
 
-# @app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
-#               [Input('interval-component', 'n_intervals')])
-# def summary_table(n):
-#     the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
-#     data=the_table.to_dict('records')
-#     columns=[{"name": i, "id": i} for i in the_table.columns]
-#     return data, columns
+@app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
+              [Input('interval-component', 'n_intervals')])
+def summary_table(n):
+    the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
+    data=the_table.to_dict('records')
+    columns=[{"name": i, "id": i} for i in the_table.columns]
+    return data, columns
 
 @app.callback([Output("vote-table", "data"), Output('vote-table', 'columns')],
               [Input('interval-component', 'n_intervals')])
@@ -348,11 +348,11 @@ def vote_table(n):
     columns=[{"name": i, "id": i} for i in vote_table.columns]
     return data, columns
 
-# @app.callback(Output('florida-map', 'figure'),
-#               [Input('interval-component', 'n_intervals')])
-# def fl_map(n):
-#     map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
-#     return map_FL
+@app.callback(Output('florida-map', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def fl_map(n):
+    map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
+    return map_FL
 
 # @app.callback(Output('penn-map', 'figure'),
 #               [Input('interval-component', 'n_intervals')])
@@ -378,11 +378,11 @@ def nc_map(n):
 #     stacked_fig_PA = stacked_bars(EN_PA_df, "Pennsylvania")
 #     return stacked_fig_PA
 
-# @app.callback(Output('florida-stacked', 'figure'),
-#               [Input('interval-component', 'n_intervals')])
-# def fl_stacked(n):
-#     stacked_fig_FL = stacked_bars(EN_FL_df, "Florida")
-#     return stacked_fig_FL
+@app.callback(Output('florida-stacked', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def fl_stacked(n):
+    stacked_fig_FL = stacked_bars(EN_FL_df, "Florida")
+    return stacked_fig_FL
 
 # @app.callback(Output('mich-stacked', 'figure'),
 #               [Input('interval-component', 'n_intervals')])
@@ -396,12 +396,12 @@ def nc_stacked(n):
     stacked_fig_NC = stacked_bars(EN_NC_df, "North Carolina")
     return stacked_fig_NC
 
-# @app.callback(Output('florida-bubbles', 'figure'),
-#               [Input('interval-component', 'n_intervals')],
-#               [Input('fl_radio', 'value')])
-# def fl_bubbles(n, fl_radio):
-#     bubbles_fig_FL = bubbles(EN_FL_df, fl_radio, "Florida")
-#     return bubbles_fig_FL
+@app.callback(Output('florida-bubbles', 'figure'),
+              [Input('interval-component', 'n_intervals')],
+              [Input('fl_radio', 'value')])
+def fl_bubbles(n, fl_radio):
+    bubbles_fig_FL = bubbles(EN_FL_df, fl_radio, "Florida")
+    return bubbles_fig_FL
 
 # @app.callback(Output('penn-bubbles', 'figure'),
 #               [Input('interval-component', 'n_intervals')],
@@ -456,17 +456,17 @@ def make_layout():
             )
         ]),
         html.Div(id='live-update-text'),
-        # dash_table.DataTable(id='the-table', columns=[],
-        #     data=[], style_as_list_view=True,     
-        #     style_header={
-        #         'backgroundColor': 'light-grey',
-        #         'fontWeight': 'bold'},
-        #     style_cell_conditional=[
-        #         {
-        #             'if': {'column_id': c},
-        #             'fontWeight': 'bold'
-        #         } for c in ['Candidate']]
-        # ),
+        dash_table.DataTable(id='the-table', columns=[],
+            data=[], style_as_list_view=True,     
+            style_header={
+                'backgroundColor': 'light-grey',
+                'fontWeight': 'bold'},
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': c},
+                    'fontWeight': 'bold'
+                } for c in ['Candidate']]
+        ),
         dash_table.DataTable(id='vote-table', columns=[],
             data=[], style_as_list_view=True,
             style_header={
@@ -479,32 +479,32 @@ def make_layout():
                 } for c in ['Category']]
         ),
         dcc.Tabs([
-          # dcc.Tab(label='Florida', children=[
-          #     html.H4(children='''
-          #         Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
-          #         expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
-          #     '''),    
-          #     dcc.Graph(
-          #         id='florida-stacked'#,
-          #         # figure=stacked_fig_FL
-          #     ),
-          #     dcc.Graph(
-          #         id='florida-map'#,
-          #         #figure=map_FL
-          #     ),
-          #     dcc.Graph(
-          #         id='florida-bubbles'#,
-          #         # figure=bubbles_fig_FL
-          #     ),
-          #     html.H4(children='''
-          #         Select Y-axis for Bubble Chart:
-          #     '''),    
-          #     dcc.RadioItems(id='fl_radio',
-          #         options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-          #         value='2016',
-          #         labelStyle={'display': 'inline-block'}
-          #     )
-          #   ]),
+          dcc.Tab(label='Florida', children=[
+              html.H4(children='''
+                  Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
+                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
+              '''),    
+              dcc.Graph(
+                  id='florida-stacked'#,
+                  # figure=stacked_fig_FL
+              ),
+              dcc.Graph(
+                  id='florida-map'#,
+                  #figure=map_FL
+              ),
+              dcc.Graph(
+                  id='florida-bubbles'#,
+                  # figure=bubbles_fig_FL
+              ),
+              html.H4(children='''
+                  Select Y-axis for Bubble Chart:
+              '''),    
+              dcc.RadioItems(id='fl_radio',
+                  options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+                  value='2016',
+                  labelStyle={'display': 'inline-block'}
+              )
+            ]),
           # dcc.Tab(label='Pennsylvania', children=[
           #     html.H4(children='''
           #         Pennsylvania Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
