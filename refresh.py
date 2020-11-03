@@ -35,7 +35,7 @@ ncar_hist = 'https://en2020.s3.amazonaws.com/ncar_hist.csv'
 ncar_hist_df = pd.read_csv(ncar_hist,  index_col=0)
 
 # update FL url on election night
-url_FL_live = "http://fldoselectionfiles.elections.myflorida.com/enightfilespublic/20161108_ElecResultsFL.txt"
+url_FL_live = "https://flelectionfiles.floridados.gov/enightfilespublic/20201103_ElecResultsFL.txt"
 url_FL = 'https://en2020.s3.amazonaws.com/FL_data_live.txt'
 
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
@@ -97,14 +97,22 @@ def rename_columns(cols, suffix):
     return new
 
 def update_FL(input_url):
-    election_night_data_FL = read_csv_regex(input_url, ['ElectionDate'])
+    
+    resp = requests.get(input_url, headers=request_header)
+    
+    with open('/tmp/FL_data_live.txt', 'wb') as f: 
+        f.write(resp.content) 
+    s3.Bucket('en2020').put_object(Key='FL_data_live.txt', Body=resp.content,  ACL='public-read')
+
+    election_night_data_FL = read_csv_regex(url_FL, ['ElectionDate'])
     
     # write FL data from election feed to s3
-    csv_buffer_FL_live = StringIO()
-    election_night_data_FL.to_csv(csv_buffer_FL_live)
-    s3.Object('en2020', 'FL_data_live.txt').put(Body=csv_buffer_FL_live.getvalue(), ACL='public-read')
+    # csv_buffer_FL_live = StringIO()
+    # election_night_data_FL.to_csv(csv_buffer_FL_live)
+    # s3.Object('en2020', 'FL_data_live.txt').put(Body=csv_buffer_FL_live.getvalue(), ACL='public-read')
 
     return election_night_data_FL
+
 
 def update_MI(input_url):
 
