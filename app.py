@@ -348,23 +348,23 @@ def vote_table(n):
     columns=[{"name": i, "id": i} for i in vote_table.columns]
     return data, columns
 
-@app.callback(Output('florida-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def fl_map(n):
-    map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
-    return map_FL
+# @app.callback(Output('florida-map', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def fl_map(n):
+#     map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
+#     return map_FL
 
-@app.callback(Output('penn-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def pa_map(n):
-    map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
-    return map_PA
+# @app.callback(Output('penn-map', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def pa_map(n):
+#     map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
+#     return map_PA
 
-@app.callback(Output('mich-map', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def mi_map(n):
-    map_MI = choropleth(EN_MI_df, MI_map_detail[0], MI_map_detail[1], MI_map_detail[2])
-    return map_MI
+# @app.callback(Output('mich-map', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def mi_map(n):
+#     map_MI = choropleth(EN_MI_df, MI_map_detail[0], MI_map_detail[1], MI_map_detail[2])
+#     return map_MI
 
 @app.callback(Output('ncar-map', 'figure'),
               [Input('interval-component', 'n_intervals')])
@@ -372,23 +372,23 @@ def nc_map(n):
     map_NC = choropleth(EN_NC_df, NC_map_detail[0], NC_map_detail[1], NC_map_detail[2])
     return map_NC
 
-@app.callback(Output('penn-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def penn_stacked(n):
-    stacked_fig_PA = stacked_bars(EN_PA_df, "Pennsylvania")
-    return stacked_fig_PA
+# @app.callback(Output('penn-stacked', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def penn_stacked(n):
+#     stacked_fig_PA = stacked_bars(EN_PA_df, "Pennsylvania")
+#     return stacked_fig_PA
 
-@app.callback(Output('florida-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def fl_stacked(n):
-    stacked_fig_FL = stacked_bars(EN_FL_df, "Florida")
-    return stacked_fig_FL
+# @app.callback(Output('florida-stacked', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def fl_stacked(n):
+#     stacked_fig_FL = stacked_bars(EN_FL_df, "Florida")
+#     return stacked_fig_FL
 
-@app.callback(Output('mich-stacked', 'figure'),
-              [Input('interval-component', 'n_intervals')])
-def mi_stacked(n):
-    stacked_fig_MI = stacked_bars(EN_MI_df, "Michigan")
-    return stacked_fig_MI
+# @app.callback(Output('mich-stacked', 'figure'),
+#               [Input('interval-component', 'n_intervals')])
+# def mi_stacked(n):
+#     stacked_fig_MI = stacked_bars(EN_MI_df, "Michigan")
+#     return stacked_fig_MI
 
 @app.callback(Output('ncar-stacked', 'figure'),
               [Input('interval-component', 'n_intervals')])
@@ -396,26 +396,26 @@ def nc_stacked(n):
     stacked_fig_NC = stacked_bars(EN_NC_df, "North Carolina")
     return stacked_fig_NC
 
-@app.callback(Output('florida-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')],
-              [Input('fl_radio', 'value')])
-def fl_bubbles(n, fl_radio):
-    bubbles_fig_FL = bubbles(EN_FL_df, fl_radio, "Florida")
-    return bubbles_fig_FL
+# @app.callback(Output('florida-bubbles', 'figure'),
+#               [Input('interval-component', 'n_intervals')],
+#               [Input('fl_radio', 'value')])
+# def fl_bubbles(n, fl_radio):
+#     bubbles_fig_FL = bubbles(EN_FL_df, fl_radio, "Florida")
+#     return bubbles_fig_FL
 
-@app.callback(Output('penn-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')],
-              [Input('pa_radio', 'value')])
-def penn_bubbles(n, pa_radio):
-    bubbles_fig_PA = bubbles(EN_PA_df, pa_radio, 'Pennsylvania')
-    return bubbles_fig_PA
+# @app.callback(Output('penn-bubbles', 'figure'),
+#               [Input('interval-component', 'n_intervals')],
+#               [Input('pa_radio', 'value')])
+# def penn_bubbles(n, pa_radio):
+#     bubbles_fig_PA = bubbles(EN_PA_df, pa_radio, 'Pennsylvania')
+#     return bubbles_fig_PA
 
-@app.callback(Output('mich-bubbles', 'figure'),
-              [Input('interval-component', 'n_intervals')],
-              [Input('mi_radio', 'value')])
-def mich_bubbles(n, mi_radio):
-    bubbles_fig_MI = bubbles(EN_MI_df, mi_radio, 'Michigan')
-    return bubbles_fig_MI
+# @app.callback(Output('mich-bubbles', 'figure'),
+#               [Input('interval-component', 'n_intervals')],
+#               [Input('mi_radio', 'value')])
+# def mich_bubbles(n, mi_radio):
+#     bubbles_fig_MI = bubbles(EN_MI_df, mi_radio, 'Michigan')
+#     return bubbles_fig_MI
 
 @app.callback(Output('ncar-bubbles', 'figure'),
               [Input('interval-component', 'n_intervals')],
@@ -447,11 +447,9 @@ def make_layout():
                 """
                 _Grackle Live: Be the Early Bird._ 
 
-                On this page you'll find dashboards for Florida, Pennsylvania, Michigan and North Carolina with live presidential election results.
+                This page is now LIVE. The North Carolina data should begin to populate around 7:30PM EST. Other states (FL, PA, MI) will be added back as polls close and data feeds are posted.
 
                 Please be aware of how votes are being counted in each state. I have added notes to each state, but tl;dr: MI/PA counts on Election Night could look very GOP-favored since it will take much longer for these states to process absentee/early ballots. 
-
-                NOTE: Dashboards for FL, PA and MI are currently populated with data from previous elections for display purposes, although the labels (candidate names) are set up for next week. NC is blank and will not display data until Tuesday.
 
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
@@ -481,78 +479,78 @@ def make_layout():
                 } for c in ['Category']]
         ),
         dcc.Tabs([
-          dcc.Tab(label='Florida', children=[
-              html.H4(children='''
-                  Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
-                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
-              '''),    
-              dcc.Graph(
-                  id='florida-stacked'#,
-                  # figure=stacked_fig_FL
-              ),
-              dcc.Graph(
-                  id='florida-map'#,
-                  #figure=map_FL
-              ),
-              dcc.Graph(
-                  id='florida-bubbles'#,
-                  # figure=bubbles_fig_FL
-              ),
-              html.H4(children='''
-                  Select Y-axis for Bubble Chart:
-              '''),    
-              dcc.RadioItems(id='fl_radio',
-                  options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-                  value='2016',
-                  labelStyle={'display': 'inline-block'}
-              )
-            ]),
-          dcc.Tab(label='Pennsylvania', children=[
-              html.H4(children='''
-                  Pennsylvania Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
-                  several days. As more votes are counted, expect vote to shift towards Democrats. 
-              '''),    
-              dcc.Graph(
-                  id='penn-stacked'#,
-              ),
-              dcc.Graph(
-                  id='penn-map'#,
-              ),
-              dcc.Graph(
-                  id='penn-bubbles'#,
-              ),
-              html.H4(children='''
-                  Select Y-axis for Bubble Chart:
-              '''),    
-              dcc.RadioItems(id='pa_radio',
-                  options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-                  value='2016',
-                  labelStyle={'display': 'inline-block'}
-              )
-            ]),
-          dcc.Tab(label='Michigan', children=[
-              html.H4(children='''
-                  Michigan Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
-                  several days. As more votes are counted, expect vote to shift towards Democrats. 
-              '''),    
-              dcc.Graph(
-                  id='mich-stacked'#,
-              ),
-              dcc.Graph(
-                  id='mich-map'#,
-              ),
-              dcc.Graph(
-                  id='mich-bubbles'#,
-              ),
-              html.H4(children='''
-                  Select Y-axis for Bubble Chart:
-              '''),    
-              dcc.RadioItems(id='mi_radio',
-                  options=[{'label': i, 'value': i} for i in ['2012', '2016']],
-                  value='2016',
-                  labelStyle={'display': 'inline-block'}
-              )
-            ]),
+          # dcc.Tab(label='Florida', children=[
+          #     html.H4(children='''
+          #         Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
+          #         expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
+          #     '''),    
+          #     dcc.Graph(
+          #         id='florida-stacked'#,
+          #         # figure=stacked_fig_FL
+          #     ),
+          #     dcc.Graph(
+          #         id='florida-map'#,
+          #         #figure=map_FL
+          #     ),
+          #     dcc.Graph(
+          #         id='florida-bubbles'#,
+          #         # figure=bubbles_fig_FL
+          #     ),
+          #     html.H4(children='''
+          #         Select Y-axis for Bubble Chart:
+          #     '''),    
+          #     dcc.RadioItems(id='fl_radio',
+          #         options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+          #         value='2016',
+          #         labelStyle={'display': 'inline-block'}
+          #     )
+          #   ]),
+          # dcc.Tab(label='Pennsylvania', children=[
+          #     html.H4(children='''
+          #         Pennsylvania Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
+          #         several days. As more votes are counted, expect results to shift towards Democrats. 
+          #     '''),    
+          #     dcc.Graph(
+          #         id='penn-stacked'#,
+          #     ),
+          #     dcc.Graph(
+          #         id='penn-map'#,
+          #     ),
+          #     dcc.Graph(
+          #         id='penn-bubbles'#,
+          #     ),
+          #     html.H4(children='''
+          #         Select Y-axis for Bubble Chart:
+          #     '''),    
+          #     dcc.RadioItems(id='pa_radio',
+          #         options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+          #         value='2016',
+          #         labelStyle={'display': 'inline-block'}
+          #     )
+          #   ]),
+          # dcc.Tab(label='Michigan', children=[
+          #     html.H4(children='''
+          #         Michigan Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
+          #         several days. As more votes are counted, expect results to shift towards Democrats. 
+          #     '''),    
+          #     dcc.Graph(
+          #         id='mich-stacked'#,
+          #     ),
+          #     dcc.Graph(
+          #         id='mich-map'#,
+          #     ),
+          #     dcc.Graph(
+          #         id='mich-bubbles'#,
+          #     ),
+          #     html.H4(children='''
+          #         Select Y-axis for Bubble Chart:
+          #     '''),    
+          #     dcc.RadioItems(id='mi_radio',
+          #         options=[{'label': i, 'value': i} for i in ['2012', '2016']],
+          #         value='2016',
+          #         labelStyle={'display': 'inline-block'}
+          #     )
+          #   ]),
           dcc.Tab(label='North Carolina', children=[
               html.H4(children='''
                   North Carolina Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 

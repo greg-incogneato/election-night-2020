@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import boto3
 from datetime import datetime
@@ -38,7 +39,7 @@ url_FL_live = "http://fldoselectionfiles.elections.myflorida.com/enightfilespubl
 url_FL = 'https://en2020.s3.amazonaws.com/FL_data_live.txt'
 
 # https://www.electionreturns.pa.gov/ElectionFeed/ElectionFeed
-url_PA_live = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=23&FeedName=2020+Primary+Election+by+County'
+url_PA_live = 'https://electionreturns.pa.gov/electionFeed.aspx?ID=29&FeedName=2020+General+Election+by+County'
 url_PA = 'https://en2020.s3.amazonaws.com/PA_data_live.xml'
 
 # https://www.michigan.gov/sos/0,4670,7-127-1633_8722---,00.html
@@ -156,7 +157,8 @@ def update_PA(input_url):
     # root = tree.getroot()
 
     # create data frames for extracts from XML feed for PA
-    EN_extract_columns = ['RaceCode','CandidateName','PartyCode','CanVotes','PctVote','CountyName']
+    EN_extract_columns = ['RaceCode','CandidateName','PartyCode','ElectionDayVotes','MailVotes',
+                          'ProvisionalVotes','CanVotes','PctVote','CountyName']
     EN_extract_df = pd.DataFrame(columns=EN_extract_columns)
 
     EN_d_reporting_columns = ['CountyName','DistrictsReporting','TotalDistricts','% Reporting']
@@ -214,17 +216,17 @@ def process_live_file(live_df, hist_df, state):
                                 index=['CountyName'], columns='PartyCode3', values='CanVotes', \
                                 aggfunc=np.sum).apply(lambda x: x/x.sum(), axis=1).round(4)
 
-    if state == "PA":
-        potus_20_raw['OTHER'] = 0
-        potus_20_raw = potus_20_raw[['DEM', 'OTHER', 'REP']]
+    # if state == "PA":
+    #     potus_20_raw['OTHER'] = 0
+    #     potus_20_raw = potus_20_raw[['DEM', 'OTHER', 'REP']]
 
     potus_20_raw['NET_DEM'] = potus_20_raw["DEM"] - potus_20_raw["REP"]
     potus_20_raw['WINNER'] = potus_20_raw.apply(county_winner, axis=1)
     potus_20_raw.columns = rename_columns(orig_col_list, '_20_raw')
 
-    if state == "PA":
-        potus_20_pct['OTHER'] = 0
-        potus_20_pct = potus_20_pct[['DEM', 'OTHER', 'REP']]
+    # if state == "PA":
+    #     potus_20_pct['OTHER'] = 0
+    #     potus_20_pct = potus_20_pct[['DEM', 'OTHER', 'REP']]
 
     potus_20_pct['NET_DEM'] = potus_20_pct["DEM"] - potus_20_pct["REP"]
     potus_20_pct['WINNER'] = potus_20_pct.apply(county_winner, axis=1)
