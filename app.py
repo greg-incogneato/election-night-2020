@@ -332,13 +332,13 @@ FL_map_detail = [27.664827,-81.515755,5]
 MI_map_detail = [44.314842,-85.602364,5]
 NC_map_detail = [35.759575,-79.019302,5]
 
-@app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
-              [Input('interval-component', 'n_intervals')])
-def summary_table(n):
-    the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
-    data=the_table.to_dict('records')
-    columns=[{"name": i, "id": i} for i in the_table.columns]
-    return data, columns
+# @app.callback([Output("the-table", "data"), Output('the-table', 'columns')],
+#               [Input('interval-component', 'n_intervals')])
+# def summary_table(n):
+#     the_table = make_table(EN_PA_df,EN_FL_df,EN_MI_df,EN_NC_df)
+#     data=the_table.to_dict('records')
+#     columns=[{"name": i, "id": i} for i in the_table.columns]
+#     return data, columns
 
 @app.callback([Output("vote-table", "data"), Output('vote-table', 'columns')],
               [Input('interval-component', 'n_intervals')])
@@ -456,17 +456,17 @@ def make_layout():
             )
         ]),
         html.Div(id='live-update-text'),
-        dash_table.DataTable(id='the-table', columns=[],
-            data=[], style_as_list_view=True,     
-            style_header={
-                'backgroundColor': 'light-grey',
-                'fontWeight': 'bold'},
-            style_cell_conditional=[
-                {
-                    'if': {'column_id': c},
-                    'fontWeight': 'bold'
-                } for c in ['Candidate']]
-        ),
+        # dash_table.DataTable(id='the-table', columns=[],
+        #     data=[], style_as_list_view=True,     
+        #     style_header={
+        #         'backgroundColor': 'light-grey',
+        #         'fontWeight': 'bold'},
+        #     style_cell_conditional=[
+        #         {
+        #             'if': {'column_id': c},
+        #             'fontWeight': 'bold'
+        #         } for c in ['Candidate']]
+        # ),
         dash_table.DataTable(id='vote-table', columns=[],
             data=[], style_as_list_view=True,
             style_header={
