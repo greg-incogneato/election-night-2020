@@ -449,13 +449,13 @@ def make_layout():
 
                 Good morning! As of 9am EST on 11/4, here is where we stand:
 
-                Florida is done.
+                *Florida* is done.
 
-                Somewhere north of 1M votes remain to be counted in PA.
+                Somewhere north of 1M votes remain to be counted in *PA*.
 
-                Michigan counties are only posted to the feed once they are finished. The bubble chart is more useful there but clearly a lot of votes remain.
+                *Michigan* counties are only posted to the feed once they are finished. The bubble chart is more useful there but clearly a lot of votes remain.
 
-                North Carolina has votes outsanding in Mecklenburg and Wake, so keep an eye on it there.
+                *North Carolina* has votes outstanding in Mecklenburg and Wake, so keep an eye on it there.
 
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
