@@ -29,7 +29,7 @@ s3 = boto3.resource('s3')
 # re-scan the dashboard data files to pick up updates
 # set to load every 60 seconds; data will refresh every 1 minutes
 # number of seconds between re-calculating the data                                                                                                                           
-UPDATE_INTERVAL = 60*2
+UPDATE_INTERVAL = 60*5
 
 def get_new_data_PA():
     """Updates the global variable 'data' with new data"""
@@ -447,9 +447,15 @@ def make_layout():
                 """
                 _Grackle Live: Be the Early Bird._ 
 
-                This page is now LIVE. The North Carolina data should begin to populate around 7:30PM EST. Other states (FL, PA, MI) will be added back as polls close and data feeds are posted.
+                Good morning! As of 9am EST on 11/4, here is where we stand:
 
-                Please be aware of how votes are being counted in each state. I have added notes to each state, but tl;dr: MI/PA counts on Election Night could look very GOP-favored since it will take much longer for these states to process absentee/early ballots. 
+                Florida is done.
+
+                Somewhere north of 1M votes remain to be counted in PA.
+
+                Michigan counties are only posted to the feed once they are finished. The bubble chart is more useful there but clearly a lot of votes remain.
+
+                North Carolina has votes outsanding in Mecklenburg and Wake, so keep an eye on it there.
 
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
@@ -480,10 +486,6 @@ def make_layout():
         ),
         dcc.Tabs([
           dcc.Tab(label='Pennsylvania', children=[
-              html.H4(children='''
-                  Pennsylvania Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
-                  several days. As more votes are counted, expect results to shift towards Democrats. 
-              '''),    
               dcc.Graph(
                   id='penn-stacked'#,
               ),
@@ -503,10 +505,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='Michigan', children=[
-              html.H4(children='''
-                  Michigan Vote Count Expectations: Absentee votes will not be counted until Election Day, so expect a long, slow vote count that could take
-                  several days. As more votes are counted, expect results to shift towards Democrats. 
-              '''),    
               dcc.Graph(
                   id='mich-stacked'#,
               ),
@@ -526,10 +524,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='North Carolina', children=[
-              html.H4(children='''
-                  North Carolina Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
-                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
-              '''),    
               dcc.Graph(
                   id='ncar-stacked'#,
               ),
@@ -549,10 +543,6 @@ def make_layout():
               )
             ]),
           dcc.Tab(label='Florida', children=[
-              html.H4(children='''
-                  Florida Vote Count Expectations: Early/absentee vote counting should be mostly complete by Election Night; initial vote count will include early/absentee votes and should favor Democrats; 
-                  expect race to tighten as more votes are counted, but late-received/late-counted absentee votes could shift back to favor Democrats.
-              '''),    
               dcc.Graph(
                   id='florida-stacked'#,
                   # figure=stacked_fig_FL
@@ -577,7 +567,7 @@ def make_layout():
         ]), 
         dcc.Interval(
             id='interval-component',
-            interval=1*1000*60*2, # 2 minutes in milliseconds
+            interval=1*1000*60*5, # 5 minutes in milliseconds
             n_intervals=0
         ),
         html.H2(children=
