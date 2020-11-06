@@ -29,7 +29,7 @@ s3 = boto3.resource('s3')
 # re-scan the dashboard data files to pick up updates
 # set to load every 60 seconds; data will refresh every 1 minutes
 # number of seconds between re-calculating the data                                                                                                                           
-UPDATE_INTERVAL = 60*5
+UPDATE_INTERVAL = 60*15
 
 def get_new_data_PA():
     """Updates the global variable 'data' with new data"""
@@ -429,7 +429,7 @@ def ncar_bubbles(n, nc_radio):
 def update_refresh_timestamp(n):
     timezone = pytz.timezone("US/Eastern")
     timestamp = datetime.now().astimezone(timezone).strftime("%I:%M%p US/Eastern %b %d %Y")
-    return "Data refreshes every 2 minutes. Last updated: %s" % timestamp
+    return "Data refreshes every 15 minutes. Last updated: %s" % timestamp
 
 # map_PA = choropleth(EN_PA_df, PA_map_detail[0], PA_map_detail[1], PA_map_detail[2])
 # map_FL = choropleth(EN_FL_df, FL_map_detail[0], FL_map_detail[1], FL_map_detail[2])
@@ -447,15 +447,7 @@ def make_layout():
                 """
                 _Grackle Live: Be the Early Bird._ 
 
-                Good morning! As of 9am EST on 11/4, here is where we stand:
-
-                *Florida* is done.
-
-                Somewhere north of 1M votes remain to be counted in *PA*.
-
-                *Michigan* counties are only posted to the feed once they are finished. The bubble chart is more useful there but clearly a lot of votes remain.
-
-                *North Carolina* has votes outstanding in Mecklenburg and Wake, so keep an eye on it there.
+                Thanks for visiting Grackle.Live! Updates will be much more sporadic now that most counting is done. 
 
                 For more information, visit the FAQ @ [about.grackle.live](https://about.grackle.live) or scroll down to see the contact details at the bottom of the page.
                 """
@@ -567,7 +559,7 @@ def make_layout():
         ]), 
         dcc.Interval(
             id='interval-component',
-            interval=1*1000*60*5, # 5 minutes in milliseconds
+            interval=1*1000*60*15, # 15 minutes in milliseconds
             n_intervals=0
         ),
         html.H2(children=
